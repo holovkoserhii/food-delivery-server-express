@@ -1,42 +1,42 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+const fs = require("fs");
+const path = require("path");
+const util = require("util");
 
-const usersFolder = path.resolve(__dirname, '../../../', 'data/users');
-
+const filePath = path.join(__dirname, "../../db/users/all-users.json");
 const writeFile = util.promisify(fs.writeFile);
 
-const saveNewUser = (fileName, data) => {
-  const src = path.resolve(usersFolder, fileName + '.json');
-  const dataStr = JSON.stringify(data);
-
-  return writeFile(src, dataStr);
-};
-
 const createUser = (request, response) => {
+  console.log("start creating a user");
   const user = request.body;
-  const userData = Object.assign({}, user, { id: Date.now() });
+  const userData = { ...user, id: Date.now() };
 
-  const fileName = userData.userName.toLowerCase() + userData.id;
+  const arrDB = JSON.parse(
+    fs.readFileSync(filePath, (err, data) => {
+      if (err) throw err;
+      console.log(data);
+    })
+  );
+  const newArrDB = { users: [...arrDB.users, userData] };
+
+  const newArrDBStr = JSON.stringify(newArrDB);
 
   const sendResponse = () => {
     response.json({
-      status: 'success',
+      status: "success",
       user: userData
-  });
+    });
   };
 
   const sendError = () => {
     response.status(400);
     response.json({
-      error: 'user was not saved'
+      error: "user was not saved"
     });
   };
 
-  saveNewUser(fileName, userData)
+  writeFile(filePath, newArrDBStr)
     .then(sendResponse)
     .catch(sendError);
-
 };
 
 module.exports = createUser;
