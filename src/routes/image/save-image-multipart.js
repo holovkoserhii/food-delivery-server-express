@@ -16,7 +16,6 @@ const storage = multer.diskStorage({
   // определяем имя файла
   filename: (req, file, next) => {
     next(null, file.originalname);
-    console.log(file.originalname);
   }
 });
 
@@ -32,8 +31,6 @@ const moveImage = (fileObject, userId) => {
     fs.mkdirSync(userImagePath, { recursive: true });
   }
 
-  console.log(fileObject);
-
   const tempFilePath = path.join(TEMP_IMAGE_FOLDER, fileObject.originalname);
   const newFilePath = path.join(userImagePath, fileObject.originalname);
 
@@ -47,7 +44,6 @@ const moveImage = (fileObject, userId) => {
 const saveImageMultipart = (req, res) => {
   // Берем файл
   const fileObject = req.file;
-  console.log(Object.keys(req.body));
 
   // Берем другие данные что пришли
   const userId = req.body.userId;
@@ -56,8 +52,6 @@ const saveImageMultipart = (req, res) => {
     res.json({ status: "was saved in folder: " + userImageFolderName });
   });
 
-  // console.log("UPLOAD: ", upload.single);
 };
-// console.log(upload.single("blob")());
 // добавляем промежуточный обработчик для post-multipart запросов
 module.exports = () => [upload.single("file"), saveImageMultipart];
